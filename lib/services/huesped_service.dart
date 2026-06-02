@@ -1,27 +1,17 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/huesped.dart';
 
-final supabaseClientProvider = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
-});
-
-final huespedServiceProvider = Provider<HuespedService>((ref) {
-  return HuespedService(ref.watch(supabaseClientProvider));
-});
-
-final huespedesProvider = FutureProvider<List<Huesped>>((ref) async {
-  final service = ref.watch(huespedServiceProvider);
-  return service.getHuespedes();
-});
-
+/// Servicio para operaciones CRUD de huéspedes en Supabase.
 class HuespedService {
   final SupabaseClient _client;
 
   HuespedService(this._client);
 
   Future<List<Huesped>> getHuespedes() async {
-    final response = await _client.from('huesped').select().order('idhuesped', ascending: false);
+    final response = await _client
+        .from('huesped')
+        .select()
+        .order('idhuesped', ascending: false);
     return (response as List).map((e) => Huesped.fromJson(e)).toList();
   }
 

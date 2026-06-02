@@ -40,4 +40,14 @@ class Huesped {
       'direccion': direccion,
     };
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Huesped &&
+          runtimeType == other.runtimeType &&
+          idHuesped == other.idHuesped;
+
+  @override
+  int get hashCode => idHuesped.hashCode;
 }

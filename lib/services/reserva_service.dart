@@ -1,28 +1,21 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/reserva.dart';
-import 'huesped_service.dart';
 
-final reservaServiceProvider = Provider<ReservaService>((ref) {
-  return ReservaService(ref.watch(supabaseClientProvider));
-});
-
-final reservasActivasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final service = ref.watch(reservaServiceProvider);
-  return service.getReservasActivasConDetalles();
-});
-
+/// Servicio para operaciones CRUD de reservas en Supabase.
 class ReservaService {
   final SupabaseClient _client;
 
   ReservaService(this._client);
 
   Future<List<Reserva>> getReservas() async {
-    final response = await _client.from('reserva').select().order('fechaentrada', ascending: false);
+    final response = await _client
+        .from('reserva')
+        .select()
+        .order('fechaentrada', ascending: false);
     return (response as List).map((e) => Reserva.fromJson(e)).toList();
   }
 
-  // Traer reservas activas junto con datos de Huesped y Habitacion
+  /// Traer reservas activas junto con datos de Huésped y Habitación.
   Future<List<Map<String, dynamic>>> getReservasActivasConDetalles() async {
     final response = await _client
         .from('reserva')

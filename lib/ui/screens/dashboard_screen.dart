@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
-import '../../services/habitacion_service.dart';
-import '../../services/reserva_service.dart';
+import '../../providers/habitacion_providers.dart';
+import '../../providers/reserva_providers.dart';
+import '../../ui/widgets/empty_state.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -54,7 +55,10 @@ class DashboardScreen extends ConsumerWidget {
                 child: reservasAsync.when(
                   data: (reservas) {
                     if (reservas.isEmpty) {
-                      return const Center(child: Text('No hay reservas activas en este momento.'));
+                      return const EmptyState(
+                        icon: Icons.event_available,
+                        message: 'No hay reservas activas en este momento.',
+                      );
                     }
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,

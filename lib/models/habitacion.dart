@@ -32,4 +32,14 @@ class Habitacion {
       'estado': estado,
     };
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Habitacion &&
+          runtimeType == other.runtimeType &&
+          idHabitacion == other.idHabitacion;
+
+  @override
+  int get hashCode => idHabitacion.hashCode;
 }

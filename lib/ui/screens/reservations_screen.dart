@@ -4,14 +4,9 @@ import 'package:intl/intl.dart';
 import '../../models/reserva.dart';
 import '../../models/huesped.dart';
 import '../../models/habitacion.dart';
-import '../../services/reserva_service.dart';
-import '../../services/huesped_service.dart';
-import '../../services/habitacion_service.dart';
-
-final habitacionesDisponiblesProvider = FutureProvider<List<Habitacion>>((ref) async {
-  final service = ref.watch(habitacionServiceProvider);
-  return service.getHabitacionesDisponibles();
-});
+import '../../providers/reserva_providers.dart';
+import '../../providers/huesped_providers.dart';
+import '../../providers/habitacion_providers.dart';
 
 class ReservationsScreen extends ConsumerStatefulWidget {
   const ReservationsScreen({super.key});
@@ -41,8 +36,12 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isEntrada) async {
-    final initialDate = isEntrada ? (_fechaEntrada ?? DateTime.now()) : (_fechaSalida ?? (_fechaEntrada ?? DateTime.now()).add(const Duration(days: 1)));
-    final firstDate = isEntrada ? DateTime.now() : (_fechaEntrada ?? DateTime.now()).add(const Duration(days: 1));
+    final initialDate = isEntrada
+        ? (_fechaEntrada ?? DateTime.now())
+        : (_fechaSalida ?? (_fechaEntrada ?? DateTime.now()).add(const Duration(days: 1)));
+    final firstDate = isEntrada
+        ? DateTime.now()
+        : (_fechaEntrada ?? DateTime.now()).add(const Duration(days: 1));
     
     final picked = await showDatePicker(
       context: context,
@@ -66,8 +65,16 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
   }
 
   Future<void> _guardarReserva() async {
-    if (_selectedHuesped == null || _selectedHabitacion == null || _fechaEntrada == null || _fechaSalida == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor complete todos los campos'), backgroundColor: Colors.red));
+    if (_selectedHuesped == null ||
+        _selectedHabitacion == null ||
+        _fechaEntrada == null ||
+        _fechaSalida == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor complete todos los campos'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -85,7 +92,9 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
       await service.createReserva(reserva);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reserva creada exitosamente.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reserva creada exitosamente.')),
+      );
       
       setState(() {
         _selectedHuesped = null;
@@ -99,7 +108,9 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
       ref.invalidate(reservasActivasProvider);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -114,7 +125,7 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
       appBar: AppBar(
         title: const Text('Nueva Reserva', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Card(
           child: Padding(
@@ -122,6 +133,7 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
             child: Form(
               key: _formKey,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Detalles de la Reserva', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -147,6 +159,7 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
                       return DropdownButtonFormField<Huesped>(
                         decoration: const InputDecoration(labelText: 'Huésped'),
                         initialValue: currentSelection,
+                        menuMaxHeight: 300,
                         isExpanded: true,
                         items: huespedes.map((h) => DropdownMenuItem(
                           value: h,
@@ -155,7 +168,7 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
                         onChanged: (val) => setState(() => _selectedHuesped = val),
                       );
                     },
-                    loading: () => const CircularProgressIndicator(),
+                    loading: () => const LinearProgressIndicator(),
                     error: (err, stack) => Text('Error al cargar huéspedes: $err'),
                   ),
                   const SizedBox(height: 16),
@@ -178,6 +191,7 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
                       return DropdownButtonFormField<Habitacion>(
                         decoration: const InputDecoration(labelText: 'Habitación (Solo Disponibles)'),
                         initialValue: currentHabSelection,
+                        menuMaxHeight: 300,
                         isExpanded: true,
                         items: habitaciones.map((h) => DropdownMenuItem(
                           value: h,
@@ -186,7 +200,7 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
                         onChanged: (val) => setState(() => _selectedHabitacion = val),
                       );
                     },
-                    loading: () => const CircularProgressIndicator(),
+                    loading: () => const LinearProgressIndicator(),
                     error: (err, stack) => Text('Error al cargar habitaciones: $err'),
                   ),
                   const SizedBox(height: 16),
@@ -199,7 +213,11 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
                           onTap: () => _selectDate(context, true),
                           child: InputDecorator(
                             decoration: const InputDecoration(labelText: 'Fecha de Entrada'),
-                            child: Text(_fechaEntrada == null ? 'Seleccionar' : DateFormat('dd/MM/yyyy').format(_fechaEntrada!)),
+                            child: Text(
+                              _fechaEntrada == null
+                                  ? 'Seleccionar'
+                                  : DateFormat('dd/MM/yyyy').format(_fechaEntrada!),
+                            ),
                           ),
                         ),
                       ),
@@ -209,7 +227,11 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
                           onTap: () => _selectDate(context, false),
                           child: InputDecorator(
                             decoration: const InputDecoration(labelText: 'Fecha de Salida'),
-                            child: Text(_fechaSalida == null ? 'Seleccionar' : DateFormat('dd/MM/yyyy').format(_fechaSalida!)),
+                            child: Text(
+                              _fechaSalida == null
+                                  ? 'Seleccionar'
+                                  : DateFormat('dd/MM/yyyy').format(_fechaSalida!),
+                            ),
                           ),
                         ),
                       ),
@@ -226,7 +248,7 @@ class _ReservationsScreenState extends ConsumerState<ReservationsScreen> {
                           ? const CircularProgressIndicator(color: Colors.white) 
                           : const Text('Confirmar Reserva', style: TextStyle(fontSize: 16)),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

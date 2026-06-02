@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme.dart';
 import '../../models/habitacion.dart';
-import '../../services/habitacion_service.dart';
+import '../../providers/habitacion_providers.dart';
+import '../../ui/widgets/empty_state.dart';
 
 class RoomsScreen extends ConsumerWidget {
   const RoomsScreen({super.key});
@@ -33,7 +34,11 @@ class RoomsScreen extends ConsumerWidget {
         child: habitacionesAsync.when(
           data: (habitaciones) {
             if (habitaciones.isEmpty) {
-              return const Center(child: Text('No hay habitaciones.'));
+              return const EmptyState(
+                icon: Icons.meeting_room_outlined,
+                message: 'No hay habitaciones.',
+                subtitle: 'Agrega una habitación con el botón de abajo.',
+              );
             }
             return GridView.builder(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -84,13 +89,16 @@ class RoomsScreen extends ConsumerWidget {
                                 h.estado,
                                 style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
                               ),
-                            )
+                            ),
                           ],
                         ),
                         const Spacer(),
                         Text('Tipo: ${h.tipo}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('\$${h.precioPorNoche.toStringAsFixed(2)} / noche', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryNavy)),
+                        Text(
+                          '\$${h.precioPorNoche.toStringAsFixed(2)} / noche',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryNavy),
+                        ),
                         const Spacer(),
                         SizedBox(
                           width: double.infinity,
@@ -102,7 +110,7 @@ class RoomsScreen extends ConsumerWidget {
                             ),
                             child: const Text('Actualizar Estado'),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -201,6 +209,7 @@ class _NuevaHabitacionDialogState extends State<_NuevaHabitacionDialog> {
       await service.createHabitacion(nuevaHabitacion);
 
       widget.ref.invalidate(habitacionesProvider);
+      widget.ref.invalidate(habitacionesDisponiblesProvider);
 
       if (!mounted) return;
       Navigator.pop(context);
@@ -270,4 +279,3 @@ class _NuevaHabitacionDialogState extends State<_NuevaHabitacionDialog> {
     );
   }
 }
-

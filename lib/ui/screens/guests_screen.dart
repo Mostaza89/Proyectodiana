@@ -1,24 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/huesped.dart';
-import '../../services/huesped_service.dart';
-
-class SearchGuestQueryNotifier extends Notifier<String> {
-  @override
-  String build() => '';
-  
-  void updateQuery(String query) {
-    state = query;
-  }
-}
-
-final searchGuestQueryProvider = NotifierProvider<SearchGuestQueryNotifier, String>(SearchGuestQueryNotifier.new);
-
-final searchGuestsProvider = FutureProvider<List<Huesped>>((ref) async {
-  final query = ref.watch(searchGuestQueryProvider);
-  final service = ref.watch(huespedServiceProvider);
-  return service.searchHuespedes(query);
-});
+import '../../providers/huesped_providers.dart';
+import '../../ui/widgets/empty_state.dart';
 
 class GuestsScreen extends ConsumerStatefulWidget {
   const GuestsScreen({super.key});
@@ -118,21 +102,57 @@ class _GuestsScreenState extends ConsumerState<GuestsScreen> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(child: TextFormField(controller: _nombreCtrl, decoration: const InputDecoration(labelText: 'Nombre'), validator: (v) => v!.isEmpty ? 'Requerido' : null)),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _nombreCtrl,
+                              decoration: const InputDecoration(labelText: 'Nombre'),
+                              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                            ),
+                          ),
                           const SizedBox(width: 16),
-                          Expanded(child: TextFormField(controller: _apellidoCtrl, decoration: const InputDecoration(labelText: 'Apellido'), validator: (v) => v!.isEmpty ? 'Requerido' : null)),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _apellidoCtrl,
+                              decoration: const InputDecoration(labelText: 'Apellido'),
+                              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                            ),
+                          ),
                           const SizedBox(width: 16),
-                          Expanded(child: TextFormField(controller: _docIdentidadCtrl, decoration: const InputDecoration(labelText: 'Doc. Identidad'), validator: (v) => v!.isEmpty ? 'Requerido' : null)),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _docIdentidadCtrl,
+                              decoration: const InputDecoration(labelText: 'Doc. Identidad'),
+                              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(child: TextFormField(controller: _telefonoCtrl, decoration: const InputDecoration(labelText: 'Teléfono'), validator: (v) => v!.isEmpty ? 'Requerido' : null)),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _telefonoCtrl,
+                              decoration: const InputDecoration(labelText: 'Teléfono'),
+                              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                            ),
+                          ),
                           const SizedBox(width: 16),
-                          Expanded(child: TextFormField(controller: _emailCtrl, decoration: const InputDecoration(labelText: 'Email'), validator: (v) => v!.isEmpty ? 'Requerido' : null)),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _emailCtrl,
+                              decoration: const InputDecoration(labelText: 'Email'),
+                              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                            ),
+                          ),
                           const SizedBox(width: 16),
-                          Expanded(child: TextFormField(controller: _direccionCtrl, decoration: const InputDecoration(labelText: 'Dirección'), validator: (v) => v!.isEmpty ? 'Requerido' : null)),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _direccionCtrl,
+                              decoration: const InputDecoration(labelText: 'Dirección'),
+                              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -140,10 +160,16 @@ class _GuestsScreenState extends ConsumerState<GuestsScreen> {
                         alignment: Alignment.centerRight,
                         child: ElevatedButton.icon(
                           onPressed: _isSaving ? null : _guardarHuesped,
-                          icon: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.save),
+                          icon: _isSaving
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                )
+                              : const Icon(Icons.save),
                           label: Text(_isSaving ? 'Guardando...' : 'Guardar Huésped'),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -166,7 +192,7 @@ class _GuestsScreenState extends ConsumerState<GuestsScreen> {
                       ref.read(searchGuestQueryProvider.notifier).updateQuery(val);
                     },
                   ),
-                )
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -175,7 +201,13 @@ class _GuestsScreenState extends ConsumerState<GuestsScreen> {
               child: Card(
                 child: searchAsync.when(
                   data: (huespedes) {
-                    if (huespedes.isEmpty) return const Center(child: Text('No hay huéspedes registrados.'));
+                    if (huespedes.isEmpty) {
+                      return const EmptyState(
+                        icon: Icons.people_outline,
+                        message: 'No hay huéspedes registrados.',
+                        subtitle: 'Registra un huésped usando el formulario de arriba.',
+                      );
+                    }
                     return SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: SingleChildScrollView(
